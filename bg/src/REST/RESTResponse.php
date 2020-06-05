@@ -12,6 +12,7 @@ use Bg\Sdk\REST\Interfaces\RESTResponseInterface;
 
 class RESTResponse implements RESTResponseInterface
 {
+    protected $timestamp;
 
     /** Message
      * @var string
@@ -38,11 +39,15 @@ class RESTResponse implements RESTResponseInterface
     {
         $this->raw = $raw;
         $json = json_decode($raw);
-        $this->code = $json->code;
-        $this->message = $json->msg;
-        $this->data = $json->data;
+        if(isset($json->code)) {
+            $this->code = $json->code;
+            $this->message = $json->msg;
+            $this->data = $json->data;
+        }
+        if(isset($json->timestamp)){
+            $this->timestamp = $json->timestamp;
+        }
     }
-
 
     public function getData(){
         return $this->data;
@@ -52,15 +57,33 @@ class RESTResponse implements RESTResponseInterface
         return $this->message;
     }
     public function getCode(){
-        return $this->code;
+        if(!empty($this->code)){
+            return $this->code;
+        }else{
+            return false;
+
+        }
+
     }
     public function getRaw():string{
         return $this->raw;
     }
     public function isError():bool{
-        if($this->code!=0){
+        if(!empty($this->code) && $this->code!=0){
             return true;
         }
         return false;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getTimestamp()
+    {
+        if(empty($this->timestamp)){
+            $this->timestamp = false;
+        }
+        return $this->timestamp;
+    }
+
 }
